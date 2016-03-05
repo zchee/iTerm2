@@ -37,7 +37,7 @@ Deployment:
 
 Nightly: force
 	cp plists/nightly-iTerm2.plist plists/iTerm2.plist
-	xcodebuild -parallelizeTargets -target iTerm2 -configuration Nightly && \
+	xcodebuild -parallelizeTargets -target iTerm2 -configuration Nightly -xcconfig ./iTerm2.xcconfig && \
 	git checkout -- plists/iTerm2.plist
 	chmod -R go+rX build/Nightly
 
