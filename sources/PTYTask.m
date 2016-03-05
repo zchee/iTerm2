@@ -489,7 +489,7 @@ static int MyForkPty(int *amaster,
         // already listening, there's no race here. connect will block until
         // accept is called if the main thread wins the race. accept will block
         // til connect is called if the background thread wins the race. 
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
             serverConnectionFd = iTermFileDescriptorServerAccept(serverSocketFd);
 
             // Let the main thread go. This is necessary to ensure that
