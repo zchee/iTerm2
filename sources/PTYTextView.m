@@ -659,10 +659,18 @@ static const int kDragThreshold = 3;
 }
 
 - (NSFont *)eastAsianFont {
+    return _useEastAsianFont ? _eastAsianFont.font : [self nonAsciiFont];
+}
+
+- (NSFont *)eastAsianFontEvenIfNotUsed {
     return _eastAsianFont.font;
 }
 
 - (NSFont *)privateUseAreaFont {
+    return _usePrivateUseAreaFont ? _privateUseAreaFont.font : [self nonAsciiFont];
+}
+
+- (NSFont *)privateUseAreaFontEvenIfNotUsed {
     return _privateUseAreaFont.font;
 }
 
@@ -5511,12 +5519,12 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 
     PTYFontInfo *rootFontInfo = usePrimary ? _primaryFont : _secondaryFont;
 
-    if (((ch >= 0x3000 && ch <= 0x303f) || (ch >= 0x3040 && ch <= 0x309f)
+    if (_useEastAsianFont && ((ch >= 0x3000 && ch <= 0x303f) || (ch >= 0x3040 && ch <= 0x309f)
          || (ch >= 0x30a0 && ch <= 0x30ff) || (ch >= 0xff00 && ch <= 0xffef)
          || (ch >= 0x4e00 && ch <= 0x9faf))) {
         theFont = _eastAsianFont;
         rootFontInfo = _eastAsianFont;
-    } else if ((ch >= 0xe000 && ch <= 0xf8ff)) {
+    } else if (_usePrivateUseAreaFont && (ch >= 0xe000 && ch <= 0xf8ff)) {
         theFont = _privateUseAreaFont;
         rootFontInfo = _privateUseAreaFont;
     } else {
