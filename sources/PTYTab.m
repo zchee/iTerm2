@@ -2780,6 +2780,7 @@ static void SetAgainstGrainDim(BOOL isVertical, NSSize *dest, CGFloat value) {
     [[ProfileModel sharedInstance] setObject:[ITAddressBookMgr descFromFont:nonAsciiFont]
                                        forKey:KEY_NON_ASCII_FONT
                                    inBookmark:[PTYTab tmuxBookmark]];
+
     [[ProfileModel sharedInstance] setObject:[NSNumber numberWithDouble:hs]
                                        forKey:KEY_HORIZONTAL_SPACING
                                    inBookmark:[PTYTab tmuxBookmark]];
