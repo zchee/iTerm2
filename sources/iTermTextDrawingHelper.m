@@ -1415,7 +1415,11 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         NSString* thisCharString = nil;
         CGFloat thisCharAdvance;
 
-        if (!_useNonAsciiFont || (theLine[i].code < 128 && !theLine[i].complexChar)) {
+        if (_useEastAsianFont && isEastAsianUnichar(theLine[i].code)) {
+            attrs.antiAlias = _eastAsianAntiAlias;
+        } else if (_usePrivateUseAreaFont && (theLine[i].code >= 0xe000 && theLine[i].code <= 0xf8ff)) {
+            attrs.antiAlias = _privateUseAreaAntiAlias;
+        } else if (!_useNonAsciiFont || (theLine[i].code < 128 && !theLine[i].complexChar)) {
             attrs.antiAlias = _asciiAntiAlias;
         } else {
             attrs.antiAlias = _nonAsciiAntiAlias;
