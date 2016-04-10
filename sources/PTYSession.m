@@ -3581,6 +3581,8 @@ ITERM_WEAKLY_REFERENCEABLE
     DLog(@"Window frame: %@", window);
     if ([_textview.font isEqualTo:font] &&
         [_textview.nonAsciiFontEvenIfNotUsed isEqualTo:nonAsciiFont] &&
+        [_textview.eastAsianFontEvenIfNotUsed isEqualTo:eastAsianFont] &&
+        [_textview.privateUseAreaFontEvenIfNotUsed isEqualTo:privateUseAreaFont] &&
         [_textview horizontalSpacing] == horizontalSpacing &&
         [_textview verticalSpacing] == verticalSpacing) {
         // There's an unfortunate problem that this is a band-aid over.
@@ -3678,8 +3680,8 @@ ITERM_WEAKLY_REFERENCEABLE
         DLog(@"grow/shrink");
         font = [self fontWithRelativeSize:dir from:_textview.font];
         nonAsciiFont = [self fontWithRelativeSize:dir from:_textview.nonAsciiFontEvenIfNotUsed];
-        eastAsianFont = [self fontWithRelativeSize:dir from:_textview.eastAsianFont];
-        privateUseAreaFont = [self fontWithRelativeSize:dir from:_textview.privateUseAreaFont];
+        eastAsianFont = [self fontWithRelativeSize:dir from:_textview.eastAsianFontEvenIfNotUsed];
+        privateUseAreaFont = [self fontWithRelativeSize:dir from:_textview.privateUseAreaFontEvenIfNotUsed];
         hs = [_textview horizontalSpacing];
         vs = [_textview verticalSpacing];
     } else {

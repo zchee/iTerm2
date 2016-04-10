@@ -248,6 +248,8 @@ typedef NS_ENUM(NSInteger, PTYTextViewSelectionExtensionUnit) {
 
 // Returns the non-ascii font, even if it's not being used.
 @property(nonatomic, readonly) NSFont *nonAsciiFontEvenIfNotUsed;
+@property(nonatomic, readonly) NSFont *eastAsianFontEvenIfNotUsed;
+@property(nonatomic, readonly) NSFont *privateUseAreaFontEvenIfNotUsed;
 
 // Size of a character.
 @property(nonatomic, readonly) double lineHeight;
