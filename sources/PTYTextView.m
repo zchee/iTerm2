@@ -5515,21 +5515,44 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     *renderBold = NO;
     *renderItalic = NO;
     PTYFontInfo* theFont;
-    BOOL usePrimary = !_useNonAsciiFont || (!complex && (ch < 128));
+    PTYFontInfo* rootFontInfo;
 
-    PTYFontInfo *rootFontInfo = usePrimary ? _primaryFont : _secondaryFont;
-
-    if (_useEastAsianFont && ((ch >= 0x3000 && ch <= 0x303f) || (ch >= 0x3040 && ch <= 0x309f)
-         || (ch >= 0x30a0 && ch <= 0x30ff) || (ch >= 0xff00 && ch <= 0xffef)
-         || (ch >= 0x4e00 && ch <= 0x9faf))) {
-        theFont = _eastAsianFont;
+    // https://en.wikipedia.org/wiki/Han_unification#Unicode_ranges
+    if (_useEastAsianFont &&
+        (
+         (ch >= 0x2e80 && ch <= 0x2eff)  // CJK Radicals Supplement
+         || (ch >= 0x2f00 && ch <= 0x2fdf)  // Kangxi Radicals
+         || (ch >= 0x2ff0 && ch <= 0x2fff)  // Ideographic Description Characters
+         || (ch >= 0x3000 && ch <= 0x303f)  // CJK Symbols and Punctuation
+         || (ch >= 0x3040 && ch <= 0x309f)  // Hiragana
+         || (ch >= 0x30a0 && ch <= 0x30ff)  // Katakana
+         || (ch >= 0x3100 && ch <= 0x312f)  // Bopomofo
+         || (ch >= 0x3130 && ch <= 0x318f)  // Hangul Compatibility Jamo
+         || (ch >= 0x3190 && ch <= 0x319f)  // Kanbun (Kunten)
+         || (ch >= 0x31a0 && ch <= 0x31bf)  // Bopomofo Extended
+         || (ch >= 0x31f0 && ch <= 0x31ff)  // Katakana Phonetic Extensions
+         || (ch >= 0x3200 && ch <= 0x32ff)  // Enclosed CJK Letters and Months
+         || (ch >= 0x3300 && ch <= 0x33ff)  // CJK Compatibility
+         || (ch >= 0x3400 && ch <= 0x4dbf)  // CJK Unified Ideographs Extension A
+         || (ch >= 0x4dc0 && ch <= 0x4dff)  // Yijing Hexagram Symbols
+         || (ch >= 0x4e00 && ch <= 0x9faf)  // CJK Unified Ideographs
+         || (ch >= 0xa000 && ch <= 0xa48f)  // Yi Syllables
+         || (ch >= 0xa490 && ch <= 0xa4cf)  // Yi Radicals
+         || (ch >= 0xac00 && ch <= 0xd7af)  // Hangul Syllables
+         || (ch >= 0xf900 && ch <= 0xfaff)  // CJK Compatibility Ideographs
+         || (ch >= 0xfe30 && ch <= 0xfe4f)  // CJK Compatibility Forms
+         || (ch >= 0xff00 && ch <= 0xffef)  // Halfwidth and Fullwidth Forms
+        )) {
         rootFontInfo = _eastAsianFont;
     } else if (_usePrivateUseAreaFont && (ch >= 0xe000 && ch <= 0xf8ff)) {
-        theFont = _privateUseAreaFont;
         rootFontInfo = _privateUseAreaFont;
+    } else if (_useNonAsciiFont && complex && ch >= 128) {
+        rootFontInfo = _secondaryFont;
     } else {
-        theFont = rootFontInfo;
+        rootFontInfo = _primaryFont;
     }
+
+    theFont = rootFontInfo;
 
     if (isBold && isItalic) {
         theFont = rootFontInfo.boldItalicVersion;
