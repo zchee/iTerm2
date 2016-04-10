@@ -2703,6 +2703,10 @@ ITERM_WEAKLY_REFERENCEABLE
     [_textview setAntiAlias:[iTermProfilePreferences boolForKey:KEY_ASCII_ANTI_ALIASED
                                                       inProfile:aDict]
                    nonAscii:[iTermProfilePreferences boolForKey:KEY_NONASCII_ANTI_ALIASED
+                                                      inProfile:aDict]
+                  eastAsian:[iTermProfilePreferences boolForKey:KEY_EAST_ASIAN_ALIASED
+                                                      inProfile:aDict]
+             privateUseArea:[iTermProfilePreferences boolForKey:KEY_PUA_ALIASED
                                                       inProfile:aDict]];
     
     [self setEncoding:[iTermProfilePreferences unsignedIntegerForKey:KEY_CHARACTER_ENCODING inProfile:aDict]];
