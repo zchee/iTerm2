@@ -159,6 +159,8 @@ static const int kDragThreshold = 3;
     NSDictionary *_markedTextAttributes;
 
     PTYFontInfo *_primaryFont;
+    PTYFontInfo *_eastAsianFont;
+    PTYFontInfo *_privateUseAreaFont;
     PTYFontInfo *_secondaryFont;  // non-ascii font, only used if self.useNonAsciiFont is set.
 
     BOOL _mouseDown;
@@ -323,6 +325,8 @@ static const int kDragThreshold = 3;
         pointer_ = [[PointerController alloc] init];
         pointer_.delegate = self;
         _primaryFont = [[PTYFontInfo alloc] init];
+        _eastAsianFont = [[PTYFontInfo alloc] init];
+        _privateUseAreaFont = [[PTYFontInfo alloc] init];
         _secondaryFont = [[PTYFontInfo alloc] init];
 
         if ([pointer_ viewShouldTrackTouches]) {
@@ -382,6 +386,8 @@ static const int kDragThreshold = 3;
     [_colorMap release];
 
     [_primaryFont release];
+    [_eastAsianFont release];
+    [_privateUseAreaFont release];
     [_secondaryFont release];
 
     [_markedTextAttributes release];
@@ -573,6 +579,22 @@ static const int kDragThreshold = 3;
     [self updateMarkedTextAttributes];
 }
 
+- (void)setUseEastAsianFont:(BOOL)useEastAsianFont {
+//    _drawingHelper.useEastAsianFont = useEastAsianFont;
+    _drawingHelper.useNonAsciiFont = useEastAsianFont;
+    _useEastAsianFont = useEastAsianFont;
+    [self setNeedsDisplay:YES];
+    [self updateMarkedTextAttributes];
+}
+
+- (void)setUsePrivateUseAreaFont:(BOOL)usePrivateUseAreaFont {
+//    _drawingHelper.usePrivateUseAreaFont = usePrivateUseAreaFont;
+    _drawingHelper.useNonAsciiFont = usePrivateUseAreaFont;
+    _usePrivateUseAreaFont = usePrivateUseAreaFont;
+    [self setNeedsDisplay:YES];
+    [self updateMarkedTextAttributes];
+}
+
 - (void)setAntiAlias:(BOOL)asciiAntiAlias nonAscii:(BOOL)nonAsciiAntiAlias {
     _drawingHelper.asciiAntiAlias = asciiAntiAlias;
     _drawingHelper.nonAsciiAntiAlias = nonAsciiAntiAlias;
@@ -649,6 +671,14 @@ static const int kDragThreshold = 3;
     return _secondaryFont.font;
 }
 
+- (NSFont *)eastAsianFont {
+    return _eastAsianFont.font;
+}
+
+- (NSFont *)privateUseAreaFont {
+    return _privateUseAreaFont.font;
+}
+
 + (NSSize)charSizeForFont:(NSFont*)aFont horizontalSpacing:(double)hspace verticalSpacing:(double)vspace baseline:(double*)baseline
 {
     FontSizeEstimator* fse = [FontSizeEstimator fontSizeEstimatorForFont:aFont];
@@ -668,6 +698,8 @@ static const int kDragThreshold = 3;
 
 - (void)setFont:(NSFont*)aFont
     nonAsciiFont:(NSFont *)nonAsciiFont
+    eastAsianFont:(NSFont *)eastAsianFont
+    privateUseAreaFont:(NSFont *)privateUseAreaFont
     horizontalSpacing:(double)horizontalSpacing
     verticalSpacing:(double)verticalSpacing
 {
@@ -695,6 +727,18 @@ static const int kDragThreshold = 3;
     _secondaryFont.boldVersion = [_secondaryFont computedBoldVersion];
     _secondaryFont.italicVersion = [_secondaryFont computedItalicVersion];
     _secondaryFont.boldItalicVersion = [_secondaryFont computedBoldItalicVersion];
+
+    _eastAsianFont.font = eastAsianFont;
+    _eastAsianFont.baselineOffset = baseline;
+    _eastAsianFont.boldVersion = [_eastAsianFont computedBoldVersion];
+    _eastAsianFont.italicVersion = [_eastAsianFont computedItalicVersion];
+    _eastAsianFont.boldItalicVersion = [_eastAsianFont computedBoldItalicVersion];
+
+    _privateUseAreaFont.font = privateUseAreaFont;
+    _privateUseAreaFont.baselineOffset = baseline;
+    _privateUseAreaFont.boldVersion = [_privateUseAreaFont computedBoldVersion];
+    _privateUseAreaFont.italicVersion = [_privateUseAreaFont computedItalicVersion];
+    _privateUseAreaFont.boldItalicVersion = [_privateUseAreaFont computedBoldItalicVersion];
 
     // Force the secondary font to use the same baseline as the primary font.
     _secondaryFont.baselineOffset = _primaryFont.baselineOffset;
@@ -5515,7 +5559,18 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     BOOL usePrimary = !_useNonAsciiFont || (!complex && (ch < 128));
 
     PTYFontInfo *rootFontInfo = usePrimary ? _primaryFont : _secondaryFont;
-    theFont = rootFontInfo;
+
+    if (((ch >= 0x3000 && ch <= 0x303f) || (ch >= 0x3040 && ch <= 0x309f)
+         || (ch >= 0x30a0 && ch <= 0x30ff) || (ch >= 0xff00 && ch <= 0xffef)
+         || (ch >= 0x4e00 && ch <= 0x9faf))) {
+        theFont = _eastAsianFont;
+        rootFontInfo = _eastAsianFont;
+    } else if ((ch >= 0xe000 && ch <= 0xf8ff)) {
+        theFont = _privateUseAreaFont;
+        rootFontInfo = _privateUseAreaFont;
+    } else {
+        theFont = rootFontInfo;
+    }
 
     if (isBold && isItalic) {
         theFont = rootFontInfo.boldItalicVersion;
