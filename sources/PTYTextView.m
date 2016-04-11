@@ -5567,9 +5567,9 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     PTYFontInfo* rootFontInfo;
 
     // https://en.wikipedia.org/wiki/Han_unification#Unicode_ranges
-    if (_useEastAsianFont && isEastAsianUnichar(ch)) {
+    if (_useEastAsianFont && _eastAsianFont != nil && isEastAsianUnichar(ch)) {
         rootFontInfo = _eastAsianFont;
-    } else if (_usePrivateUseAreaFont && (ch >= 0xe000 && ch <= 0xf8ff)) {
+    } else if (_usePrivateUseAreaFont && _privateUseAreaFont != nil && (ch >= 0xe000 && ch <= 0xf8ff)) {
         rootFontInfo = _privateUseAreaFont;
     } else if (_useNonAsciiFont && complex && ch >= 128) {
         rootFontInfo = _secondaryFont;
