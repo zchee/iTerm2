@@ -5522,7 +5522,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
         rootFontInfo = _eastAsianFont;
     } else if (_usePrivateUseAreaFont && _privateUseAreaFont != nil && (ch >= 0xe000 && ch <= 0xf8ff)) {
         rootFontInfo = _privateUseAreaFont;
-    } else if (_useNonAsciiFont && complex && ch >= 128) {
+    } else if (_useNonAsciiFont && (complex || ch >= 128)) {
         rootFontInfo = _secondaryFont;
     } else {
         rootFontInfo = _primaryFont;
