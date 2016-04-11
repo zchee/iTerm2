@@ -310,6 +310,10 @@ typedef NS_ENUM(NSInteger, FontPrefButtonTag) {
             break;
     }
 
+    if (theFont == nil) {
+        theFont = _normalFont;
+    }
+
     [[NSFontManager sharedFontManager] setSelectedFont:theFont isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:self];
 }
