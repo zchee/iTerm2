@@ -11,7 +11,7 @@ NAME=$(shell echo $(VERSION) | sed -e "s/\\./_/g")
 
 .PHONY: clean all backup-old-iterm restart
 
-all: Development
+all: install
 dev: Development
 prod: Deployment
 debug: Development
@@ -20,8 +20,13 @@ debug: Development
 TAGS:
 	find . -name "*.[mhMH]" -exec etags -o ./TAGS -a '{}' +
 
-install: | Deployment backup-old-iterm
-	cp -R build/Deployment/iTerm2.app $(APPS)
+install: | build/Nightly/iTerm2.app backup-old-iterm clean-old-iterm
+	@if [[ $(TERM_PROGRAM) == 'iTerm.app' ]]; then echo 'Install must be the non iTerm.app'; exit 1; fi
+	cp -R build/Nightly/iTerm2.app $(APPS)
+	install build/Nightly/*.a /usr/local/lib/
+
+build/Nightly/iTerm2.app:
+	make Nightly
 
 Development:
 	echo "Using PATH for build: $(PATH)"
@@ -37,7 +42,7 @@ Deployment:
 
 Nightly: force
 	cp plists/nightly-iTerm2.plist plists/iTerm2.plist
-	xcodebuild -parallelizeTargets -target iTerm2 -configuration Nightly && \
+	xcodebuild -parallelizeTargets -target iTerm2 -configuration Nightly -xcconfig ./iTerm2.xcconfig && \
 	git checkout -- plists/iTerm2.plist
 	chmod -R go+rX build/Nightly
 
@@ -63,6 +68,9 @@ backup-old-iterm:
 	/bin/mv $(APPS)/iTerm2.app $(APPS)/iTerm2.app.bak ;\
 	 cp $(ITERM_CONF_PLIST) $(APPS)/iTerm2.app.bak/Contents/ ; \
 	fi
+
+clean-old-iterm:
+	if [[ -d $(APPS)/iTerm2.app.bak ]] ; then rm -fr $(APPS)/iTerm2.app.bak ; fi
 
 restart:
 	PATH=$(ORIG_PATH) /usr/bin/open /Applications/iTerm2.app &
