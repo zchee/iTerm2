@@ -43,7 +43,7 @@ static NSString *gLocalHostName;
         NSLog(@"Failed to launch “hostname -f”: %@", exception);
         return;
     }
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
         [task waitUntilExit];
         DLog(@"hostname -f finished with status %d", task.terminationStatus);
         if (task.terminationStatus == 0) {
