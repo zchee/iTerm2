@@ -1332,6 +1332,18 @@ static BOOL hasBecomeActive = NO;
             }
         }
     }
+
+    [self hideStuckToolTips];
+}
+
+- (void)hideStuckToolTips {
+    if ([iTermAdvancedSettingsModel hideStuckTooltips]) {
+        for (NSWindow *window in [NSApp windows]) {
+            if ([NSStringFromClass([window class]) isEqualToString:@"NSToolTipPanel"]) {
+                [window close];
+            }
+        }
+    }
 }
 
 - (void)applicationDidResignActive:(NSNotification *)aNotification {
