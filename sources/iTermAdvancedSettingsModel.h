@@ -141,5 +141,6 @@
 + (BOOL)includePasteHistoryInAdvancedPaste;
 + (BOOL)experimentalKeyHandling;
 + (BOOL)hideStuckTooltips;
++ (BOOL)indicateBellsInDockBadgeLabel;
 
 @end
