@@ -7289,8 +7289,16 @@ ITERM_WEAKLY_REFERENCEABLE
     return _view;
 }
 
+- (BOOL)pasteHelperShouldWaitForPrompt {
+    if (!_shellIntegrationEverUsed) {
+        return NO;
+    }
+
+    return self.currentCommand == nil;
+}
+
 - (BOOL)pasteHelperIsAtShellPrompt {
-    return !_shellIntegrationEverUsed || [self currentCommand] != nil;
+    return [self currentCommand] != nil;
 }
 
 - (BOOL)pasteHelperCanWaitForPrompt {
