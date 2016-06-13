@@ -144,5 +144,6 @@
 + (BOOL)indicateBellsInDockBadgeLabel;
 + (double)tabFlashAnimationDuration;
 + (NSString *)downloadsDirectory;
++ (double)pointSizeOfTimeStamp;
 
 @end
