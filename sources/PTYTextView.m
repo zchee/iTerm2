@@ -5635,8 +5635,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 #pragma mark - Private methods
 
 // Compute the length, in _charWidth cells, of the input method text.
-- (int)inputMethodEditorLength
-{
+- (int)inputMethodEditorLength {
     if (![self hasMarkedText]) {
         return 0;
     }
@@ -5662,6 +5661,10 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     // that span line breaks being wrapped to the next line.
     int x = [_dataSource cursorX] - 1;  // cursorX is 1-based
     int width = [_dataSource width];
+    if (width == 0 && len > 0) {
+        // Width should only be zero in weirdo edge cases, but the modulo below caused crashes.
+        return len;
+    }
     int extra = 0;
     int curX = x;
     for (int i = 0; i < len; ++i) {
