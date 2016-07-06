@@ -99,6 +99,20 @@ static BOOL gShowingWarning;
 }
 
 - (iTermWarningSelection)runModal {
+    iTermWarningSelection selection = [self runModalImpl];
+
+    if (selection >= 0 && selection < _warningActions.count) {
+        iTermWarningActionBlock block = _warningActions[selection].block;
+        if (block) {
+            block(selection);
+        }
+    }
+
+    return selection;
+}
+
+// Does not invoke the warning action's block
+- (iTermWarningSelection)runModalImpl {
     if (!gWarningHandler &&
         _warningType != kiTermWarningTypePersistent &&
         [self.class identifierIsSilenced:_identifier]) {
