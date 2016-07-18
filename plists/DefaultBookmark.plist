@@ -209,9 +209,17 @@
 		<key>Red Component</key>
 		<real>0.70980000495910645</real>
 	</dict>
-        <key>Use Non-ASCII Font</key>
-        <false/>
+  <key>Use Non-ASCII Font</key>
+  <false/>
 	<key>Non-ASCII Anti Aliased</key>
+	<true/>
+	<key>Use East Asian Font</key>
+	<false/>
+	<key>East Asian Font Anti Aliased</key>
+	<true/>
+	<key>Use PUA Font</key>
+	<false/>
+	<key>PUA Font Anti Aliased</key>
 	<true/>
 	<key>ASCII Anti Aliased</key>
 	<true/>
@@ -253,62 +261,62 @@
 	<integer>0</integer>
 	<key>Keyboard Map</key>
 	<dict>
-	<key>0xf703-0x280000</key>
-	<dict>
-		<key>Action</key>
-		<integer>11</integer>
-		<key>Text</key>
-		<string>0x1b 0x1b 0x5b 0x43</string>
-	</dict>
-	<key>0xf702-0x280000</key>
-	<dict>
-		<key>Action</key>
-		<integer>11</integer>
-		<key>Text</key>
-		<string>0x1b 0x1b 0x5b 0x44</string>
-	</dict>
-	<key>0xf701-0x280000</key>
-	<dict>
-		<key>Action</key>
-		<integer>11</integer>
-		<key>Text</key>
-		<string>0x1b 0x1b 0x5b 0x42</string>
-	</dict>
-	<key>0xf700-0x280000</key>
-	<dict>
-		<key>Action</key>
-		<integer>11</integer>
-		<key>Text</key>
-		<string>0x1b 0x1b 0x5b 0x41</string>
-	</dict>
-        <key>0xf700-0x260000</key>
-        <dict>
-            <key>Action</key>
-            <integer>10</integer>
-            <key>Text</key>
-            <string>[1;6A</string>
-        </dict>
-        <key>0xf701-0x260000</key>
-        <dict>
-            <key>Action</key>
-            <integer>10</integer>
-            <key>Text</key>
-            <string>[1;6B</string>
-        </dict>
-        <key>0xf702-0x260000</key>
-        <dict>
-            <key>Action</key>
-            <integer>10</integer>
-            <key>Text</key>
-            <string>[1;6D</string>
-        </dict>
-        <key>0xf703-0x260000</key>
-        <dict>
-            <key>Action</key>
-            <integer>10</integer>
-            <key>Text</key>
-            <string>[1;6C</string>
-        </dict>
+		<key>0xf703-0x280000</key>
+		<dict>
+			<key>Action</key>
+			<integer>11</integer>
+			<key>Text</key>
+			<string>0x1b 0x1b 0x5b 0x43</string>
+		</dict>
+		<key>0xf702-0x280000</key>
+		<dict>
+			<key>Action</key>
+			<integer>11</integer>
+			<key>Text</key>
+			<string>0x1b 0x1b 0x5b 0x44</string>
+		</dict>
+		<key>0xf701-0x280000</key>
+		<dict>
+			<key>Action</key>
+			<integer>11</integer>
+			<key>Text</key>
+			<string>0x1b 0x1b 0x5b 0x42</string>
+		</dict>
+		<key>0xf700-0x280000</key>
+		<dict>
+			<key>Action</key>
+			<integer>11</integer>
+			<key>Text</key>
+			<string>0x1b 0x1b 0x5b 0x41</string>
+		</dict>
+		<key>0xf700-0x260000</key>
+		<dict>
+			<key>Action</key>
+			<integer>10</integer>
+			<key>Text</key>
+			<string>[1;6A</string>
+		</dict>
+		<key>0xf701-0x260000</key>
+		<dict>
+			<key>Action</key>
+			<integer>10</integer>
+			<key>Text</key>
+			<string>[1;6B</string>
+		</dict>
+		<key>0xf702-0x260000</key>
+		<dict>
+			<key>Action</key>
+			<integer>10</integer>
+			<key>Text</key>
+			<string>[1;6D</string>
+		</dict>
+		<key>0xf703-0x260000</key>
+		<dict>
+			<key>Action</key>
+			<integer>10</integer>
+			<key>Text</key>
+			<string>[1;6C</string>
+		</dict>
 		<key>0x2d-0x40000</key>
 		<dict>
 			<key>Action</key>
@@ -400,20 +408,20 @@
 			<key>Text</key>
 			<string>[1;2C</string>
 		</dict>
-        <key>0xf701-0x240000</key>
-        <dict>
-            <key>Action</key>
-            <integer>10</integer>
-            <key>Text</key>
-            <string>[1;5B</string>
-        </dict>
-        <key>0xf700-0x240000</key>
-        <dict>
-            <key>Action</key>
-            <integer>10</integer>
-            <key>Text</key>
-            <string>[1;5A</string>
-        </dict>
+		<key>0xf701-0x240000</key>
+		<dict>
+			<key>Action</key>
+			<integer>10</integer>
+			<key>Text</key>
+			<string>[1;5B</string>
+		</dict>
+		<key>0xf700-0x240000</key>
+		<dict>
+			<key>Action</key>
+			<integer>10</integer>
+			<key>Text</key>
+			<string>[1;5A</string>
+		</dict>
 		<key>0xf703-0x240000</key>
 		<dict>
 			<key>Action</key>

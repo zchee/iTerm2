@@ -101,6 +101,12 @@
 // Should non-ASCII characters be anti-aliased?
 @property(nonatomic, assign) BOOL nonAsciiAntiAlias;
 
+// Should East Asian characters be anti-aliased?
+@property(nonatomic, assign) BOOL eastAsianAntiAlias;
+
+// Should PUA characters be anti-aliased?
+@property(nonatomic, assign) BOOL privateUseAreaAntiAlias;
+
 // Are blinking items (cursor, text) currently visible?
 @property(nonatomic, assign) BOOL blinkingItemsVisible;
 
@@ -184,6 +190,12 @@
 
 // Should the non-ascii font be used?
 @property(nonatomic, assign) BOOL useNonAsciiFont;
+
+// Should East Asian font be used?
+@property(nonatomic, assign) BOOL useEastAsianFont;
+
+// Should PUA font be used?
+@property(nonatomic, assign) BOOL usePrivateUseAreaFont;
 
 // Should text with the blink flag actually blink?
 @property(nonatomic, assign) BOOL blinkAllowed;
