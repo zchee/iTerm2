@@ -718,32 +718,32 @@ static const int kDragThreshold = 3;
                                     baseline:&baseline];
 
     _charWidthWithoutSpacing = sz.width;
-    _charHeightWithoutSpacing = sz.height;
+    _charHeightWithoutSpacing = sz.height + (verticalSpacing * 1.5);
     _horizontalSpacing = horizontalSpacing;
     _verticalSpacing = verticalSpacing;
     self.charWidth = ceil(_charWidthWithoutSpacing * horizontalSpacing);
     self.lineHeight = ceil(_charHeightWithoutSpacing * verticalSpacing);
 
     _primaryFont.font = aFont;
-    _primaryFont.baselineOffset = baseline;
+    _primaryFont.baselineOffset = baseline - (verticalSpacing * 2);
     _primaryFont.boldVersion = [_primaryFont computedBoldVersion];
     _primaryFont.italicVersion = [_primaryFont computedItalicVersion];
     _primaryFont.boldItalicVersion = [_primaryFont computedBoldItalicVersion];
 
     _secondaryFont.font = nonAsciiFont;
-    _secondaryFont.baselineOffset = baseline;
+    _secondaryFont.baselineOffset = baseline - (verticalSpacing * 2);
     _secondaryFont.boldVersion = [_secondaryFont computedBoldVersion];
     _secondaryFont.italicVersion = [_secondaryFont computedItalicVersion];
     _secondaryFont.boldItalicVersion = [_secondaryFont computedBoldItalicVersion];
 
     _eastAsianFont.font = eastAsianFont;
-    _eastAsianFont.baselineOffset = baseline;
+    _eastAsianFont.baselineOffset = baseline - (verticalSpacing * 2);
     _eastAsianFont.boldVersion = [_eastAsianFont computedBoldVersion];
     _eastAsianFont.italicVersion = [_eastAsianFont computedItalicVersion];
     _eastAsianFont.boldItalicVersion = [_eastAsianFont computedBoldItalicVersion];
 
     _privateUseAreaFont.font = privateUseAreaFont;
-    _privateUseAreaFont.baselineOffset = baseline;
+    _privateUseAreaFont.baselineOffset = baseline * 1.05;
     _privateUseAreaFont.boldVersion = [_privateUseAreaFont computedBoldVersion];
     _privateUseAreaFont.italicVersion = [_privateUseAreaFont computedItalicVersion];
     _privateUseAreaFont.boldItalicVersion = [_privateUseAreaFont computedBoldItalicVersion];
