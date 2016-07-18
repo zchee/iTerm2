@@ -567,6 +567,8 @@ typedef enum {
 - (void)changeFontSizeDirection:(int)dir;
 - (void)setFont:(NSFont*)font
     nonAsciiFont:(NSFont*)nonAsciiFont
+    eastAsianFont:(NSFont*)eastAsianFont
+    privateUseAreaFont:(NSFont*)privateUseAreaFont
     horizontalSpacing:(float)horizontalSpacing
     verticalSpacing:(float)verticalSpacing;
 

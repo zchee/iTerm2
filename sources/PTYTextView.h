@@ -182,6 +182,9 @@ typedef NS_ENUM(NSInteger, PTYTextViewSelectionExtensionUnit) {
 // Use the non-ascii font? If not set, use the regular font for all characters.
 @property(nonatomic, assign) BOOL useNonAsciiFont;
 
+@property(nonatomic, assign) BOOL useEastAsianFont;
+@property(nonatomic, assign) BOOL usePrivateUseAreaFont;
+
 // Provider for screen contents, plus misc. other stuff.
 @property(nonatomic, assign) id<PTYTextViewDataSource> dataSource;
 
@@ -240,9 +243,13 @@ typedef NS_ENUM(NSInteger, PTYTextViewSelectionExtensionUnit) {
 // Regular and non-ascii fonts.
 @property(nonatomic, readonly) NSFont *font;
 @property(nonatomic, readonly) NSFont *nonAsciiFont;
+@property(nonatomic, readonly) NSFont *eastAsianFont;
+@property(nonatomic, readonly) NSFont *privateUseAreaFont;
 
 // Returns the non-ascii font, even if it's not being used.
 @property(nonatomic, readonly) NSFont *nonAsciiFontEvenIfNotUsed;
+@property(nonatomic, readonly) NSFont *eastAsianFontEvenIfNotUsed;
+@property(nonatomic, readonly) NSFont *privateUseAreaFontEvenIfNotUsed;
 
 // Size of a character.
 @property(nonatomic, readonly) double lineHeight;
@@ -354,10 +361,15 @@ typedef void (^PTYTextViewDrawingHookBlock)(iTermTextDrawingHelper *);
 // Various accessors (TODO: convert as many as possible into properties)
 - (void)setFont:(NSFont*)aFont
     nonAsciiFont:(NSFont *)nonAsciiFont
+    eastAsianFont:(NSFont *)eastAsianFont
+    privateUseAreaFont:(NSFont *)privateUseAreaFont
     horizontalSpacing:(double)horizontalSpacing
     verticalSpacing:(double)verticalSpacing;
 - (NSRect)scrollViewContentSize;
-- (void)setAntiAlias:(BOOL)asciiAA nonAscii:(BOOL)nonAsciiAA;
+- (void)setAntiAlias:(BOOL)asciiAA
+    nonAscii:(BOOL)nonAsciiAA
+    eastAsian:(BOOL)eastAsianAA
+    privateUseArea:(BOOL)privateUseAreaAA;
 
 // Update the scroller color for light or dark backgrounds.
 - (void)updateScrollerForBackgroundColor;

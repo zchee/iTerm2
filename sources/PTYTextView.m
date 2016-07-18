@@ -159,6 +159,8 @@ static const int kDragThreshold = 3;
     NSDictionary *_markedTextAttributes;
 
     PTYFontInfo *_primaryFont;
+    PTYFontInfo *_eastAsianFont;
+    PTYFontInfo *_privateUseAreaFont;
     PTYFontInfo *_secondaryFont;  // non-ascii font, only used if self.useNonAsciiFont is set.
 
     BOOL _mouseDown;
@@ -323,6 +325,8 @@ static const int kDragThreshold = 3;
         pointer_ = [[PointerController alloc] init];
         pointer_.delegate = self;
         _primaryFont = [[PTYFontInfo alloc] init];
+        _eastAsianFont = [[PTYFontInfo alloc] init];
+        _privateUseAreaFont = [[PTYFontInfo alloc] init];
         _secondaryFont = [[PTYFontInfo alloc] init];
 
         if ([pointer_ viewShouldTrackTouches]) {
@@ -382,6 +386,8 @@ static const int kDragThreshold = 3;
     [_colorMap release];
 
     [_primaryFont release];
+    [_eastAsianFont release];
+    [_privateUseAreaFont release];
     [_secondaryFont release];
 
     [_markedTextAttributes release];
@@ -573,9 +579,25 @@ static const int kDragThreshold = 3;
     [self updateMarkedTextAttributes];
 }
 
-- (void)setAntiAlias:(BOOL)asciiAntiAlias nonAscii:(BOOL)nonAsciiAntiAlias {
-    _drawingHelper.asciiAntiAlias = asciiAntiAlias;
-    _drawingHelper.nonAsciiAntiAlias = nonAsciiAntiAlias;
+- (void)setUseEastAsianFont:(BOOL)useEastAsianFont {
+    _drawingHelper.useEastAsianFont = useEastAsianFont;
+    _useEastAsianFont = useEastAsianFont;
+    [self setNeedsDisplay:YES];
+    [self updateMarkedTextAttributes];
+}
+
+- (void)setUsePrivateUseAreaFont:(BOOL)usePrivateUseAreaFont {
+    _drawingHelper.usePrivateUseAreaFont = usePrivateUseAreaFont;
+    _usePrivateUseAreaFont = usePrivateUseAreaFont;
+    [self setNeedsDisplay:YES];
+    [self updateMarkedTextAttributes];
+}
+
+- (void)setAntiAlias:(BOOL)asciiAA nonAscii:(BOOL)nonAsciiAA eastAsian:(BOOL)eastAsianAA privateUseArea:(BOOL)privateUseAreaAA {
+    _drawingHelper.asciiAntiAlias = asciiAA;
+    _drawingHelper.nonAsciiAntiAlias = nonAsciiAA;
+    _drawingHelper.eastAsianAntiAlias = eastAsianAA;
+    _drawingHelper.privateUseAreaAntiAlias = privateUseAreaAA;
     [self setNeedsDisplay:YES];
 }
 
@@ -649,6 +671,22 @@ static const int kDragThreshold = 3;
     return _secondaryFont.font;
 }
 
+- (NSFont *)eastAsianFont {
+    return _useEastAsianFont ? _eastAsianFont.font : [self nonAsciiFont];
+}
+
+- (NSFont *)eastAsianFontEvenIfNotUsed {
+    return _eastAsianFont.font;
+}
+
+- (NSFont *)privateUseAreaFont {
+    return _usePrivateUseAreaFont ? _privateUseAreaFont.font : [self nonAsciiFont];
+}
+
+- (NSFont *)privateUseAreaFontEvenIfNotUsed {
+    return _privateUseAreaFont.font;
+}
+
 + (NSSize)charSizeForFont:(NSFont*)aFont horizontalSpacing:(double)hspace verticalSpacing:(double)vspace baseline:(double*)baseline
 {
     FontSizeEstimator* fse = [FontSizeEstimator fontSizeEstimatorForFont:aFont];
@@ -668,6 +706,8 @@ static const int kDragThreshold = 3;
 
 - (void)setFont:(NSFont*)aFont
     nonAsciiFont:(NSFont *)nonAsciiFont
+    eastAsianFont:(NSFont *)eastAsianFont
+    privateUseAreaFont:(NSFont *)privateUseAreaFont
     horizontalSpacing:(double)horizontalSpacing
     verticalSpacing:(double)verticalSpacing
 {
@@ -695,6 +735,18 @@ static const int kDragThreshold = 3;
     _secondaryFont.boldVersion = [_secondaryFont computedBoldVersion];
     _secondaryFont.italicVersion = [_secondaryFont computedItalicVersion];
     _secondaryFont.boldItalicVersion = [_secondaryFont computedBoldItalicVersion];
+
+    _eastAsianFont.font = eastAsianFont;
+    _eastAsianFont.baselineOffset = baseline;
+    _eastAsianFont.boldVersion = [_eastAsianFont computedBoldVersion];
+    _eastAsianFont.italicVersion = [_eastAsianFont computedItalicVersion];
+    _eastAsianFont.boldItalicVersion = [_eastAsianFont computedBoldItalicVersion];
+
+    _privateUseAreaFont.font = privateUseAreaFont;
+    _privateUseAreaFont.baselineOffset = baseline;
+    _privateUseAreaFont.boldVersion = [_privateUseAreaFont computedBoldVersion];
+    _privateUseAreaFont.italicVersion = [_privateUseAreaFont computedItalicVersion];
+    _privateUseAreaFont.boldItalicVersion = [_privateUseAreaFont computedBoldItalicVersion];
 
     // Force the secondary font to use the same baseline as the primary font.
     _secondaryFont.baselineOffset = _primaryFont.baselineOffset;
@@ -5559,9 +5611,19 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     *renderBold = NO;
     *renderItalic = NO;
     PTYFontInfo* theFont;
-    BOOL usePrimary = !_useNonAsciiFont || (!complex && (ch < 128));
+    PTYFontInfo* rootFontInfo;
 
-    PTYFontInfo *rootFontInfo = usePrimary ? _primaryFont : _secondaryFont;
+    // https://en.wikipedia.org/wiki/Han_unification#Unicode_ranges
+    if (_useEastAsianFont && _eastAsianFont != nil && isEastAsianUnichar(ch)) {
+        rootFontInfo = _eastAsianFont;
+    } else if (_usePrivateUseAreaFont && _privateUseAreaFont != nil && (ch >= 0xe000 && ch <= 0xf8ff)) {
+        rootFontInfo = _privateUseAreaFont;
+    } else if (_useNonAsciiFont && (complex || ch >= 128)) {
+        rootFontInfo = _secondaryFont;
+    } else {
+        rootFontInfo = _primaryFont;
+    }
+
     theFont = rootFontInfo;
 
     if (isBold && isItalic) {

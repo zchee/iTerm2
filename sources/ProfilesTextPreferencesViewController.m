@@ -16,10 +16,17 @@
 #import "PreferencePanel.h"
 
 // Tag on button to open font picker for non-ascii font.
-static NSInteger kNonAsciiFontButtonTag = 1;
+typedef NS_ENUM(NSInteger, FontPrefButtonTag) {
+    kGlobalFontButtonTag = 1,
+    kEastAsianFontButtonTag,
+    kPrivateUseAreaFontButtonTag,
+    kNonAsciiFontButtonTag,
+};
 
 @interface ProfilesTextPreferencesViewController ()
 @property(nonatomic, retain) NSFont *normalFont;
+@property(nonatomic, retain) NSFont *eastAsianFont;
+@property(nonatomic, retain) NSFont *privateUseAreaFont;
 @property(nonatomic, retain) NSFont *nonAsciiFont;
 @end
 
@@ -36,25 +43,35 @@ static NSInteger kNonAsciiFontButtonTag = 1;
     IBOutlet NSButton *_useHFSPlusMapping;
     IBOutlet NSSlider *_horizontalSpacing;
     IBOutlet NSSlider *_verticalSpacing;
+    IBOutlet NSButton *_useEastAsianFont;
+    IBOutlet NSButton *_usePrivateUseAreaFont;
     IBOutlet NSButton *_useNonAsciiFont;
     IBOutlet NSButton *_asciiAntiAliased;
+    IBOutlet NSButton *_eastAsianAntiAliased;
+    IBOutlet NSButton *_privateUseAreaAntiAliased;
     IBOutlet NSButton *_nonasciiAntiAliased;
     IBOutlet NSPopUpButton *_thinStrokes;
 
     // Labels indicating current font. Not registered as controls.
     IBOutlet NSTextField *_normalFontDescription;
+    IBOutlet NSTextField *_eastAsianFontDescription;
+    IBOutlet NSTextField *_privateUseAreaFontDescription;
     IBOutlet NSTextField *_nonAsciiFontDescription;
 
     // Warning labels
     IBOutlet NSTextField *_normalFontWantsAntialiasing;
+    IBOutlet NSTextField *_eastAsianFontWantsAntialiasing;
+    IBOutlet NSTextField *_privateUseAreaFontWantsAntialiasing;
     IBOutlet NSTextField *_nonasciiFontWantsAntialiasing;
 
     // Hide this view to hide all non-ASCII font settings.
     IBOutlet NSView *_nonAsciiFontView;
+    IBOutlet NSView *_eastAsianFontView;
+    IBOutlet NSView *_privateUseAreaView;
 
     // If set, the font picker was last opened to change the non-ascii font.
     // Used to interpret messages from it.
-    BOOL _fontPickerIsForNonAsciiFont;
+    FontPrefButtonTag _fontPickerTag;
 
     // This view is added to the font panel.
     IBOutlet NSView *_displayFontAccessoryView;
@@ -63,6 +80,8 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_normalFont release];
+    [_eastAsianFont release];
+    [_privateUseAreaFont release];
     [_nonAsciiFont release];
     [super dealloc];
 }
@@ -142,6 +161,17 @@ static NSInteger kNonAsciiFontButtonTag = 1;
                     key:KEY_VERTICAL_SPACING
                    type:kPreferenceInfoTypeSlider];
 
+    info = [self defineControl:_useEastAsianFont
+                           key:KEY_USE_EAST_ASIAN_FONT
+                          type:kPreferenceInfoTypeCheckbox];
+    info.observer = ^{ [self updateNonAsciiFontViewVisibility]; };
+
+
+    info = [self defineControl:_usePrivateUseAreaFont
+                           key:KEY_USE_PUA_FONT
+                          type:kPreferenceInfoTypeCheckbox];
+    info.observer = ^{ [self updateNonAsciiFontViewVisibility]; };
+
     info = [self defineControl:_useNonAsciiFont
                            key:KEY_USE_NONASCII_FONT
                           type:kPreferenceInfoTypeCheckbox];
@@ -149,6 +179,16 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 
     info = [self defineControl:_asciiAntiAliased
                            key:KEY_ASCII_ANTI_ALIASED
+                          type:kPreferenceInfoTypeCheckbox];
+    info.observer = ^{ [self updateWarnings]; };
+
+    info = [self defineControl:_eastAsianAntiAliased
+                           key:KEY_EAST_ASIAN_ALIASED
+                          type:kPreferenceInfoTypeCheckbox];
+    info.observer = ^{ [self updateWarnings]; };
+
+    info = [self defineControl:_privateUseAreaAntiAliased
+                           key:KEY_PUA_ALIASED
                           type:kPreferenceInfoTypeCheckbox];
     info.observer = ^{ [self updateWarnings]; };
 
@@ -168,17 +208,29 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 }
 
 - (NSArray *)keysForBulkCopy {
-    NSArray *keys = @[ KEY_NORMAL_FONT, KEY_NON_ASCII_FONT ];
+    NSArray *keys = @[ KEY_NORMAL_FONT, KEY_EAST_ASIAN_FONT, KEY_PUA_FONT, KEY_NON_ASCII_FONT ];
     return [[super keysForBulkCopy] arrayByAddingObjectsFromArray:keys];
 }
 
+- (void)setViewControlState:(NSView *)view enabled:(BOOL)enabled {
+    for (NSView *subview in [view subviews]) {
+        if ([subview isKindOfClass:[NSControl class]]) {
+            [(NSControl *)subview setEnabled:enabled];
+        }
+    }
+}
+
 - (void)updateNonAsciiFontViewVisibility {
-    _nonAsciiFontView.hidden = ![self boolForKey:KEY_USE_NONASCII_FONT];
+    [self setViewControlState:_eastAsianFontView enabled:[self boolForKey:KEY_USE_EAST_ASIAN_FONT]];
+    [self setViewControlState:_privateUseAreaView enabled:[self boolForKey:KEY_USE_PUA_FONT]];
+    [self setViewControlState:_nonAsciiFontView enabled:[self boolForKey:KEY_USE_NONASCII_FONT]];
 }
 
 - (void)updateFontsDescriptions {
     // Update the fonts.
     self.normalFont = [[self stringForKey:KEY_NORMAL_FONT] fontValue];
+    self.eastAsianFont = [[self stringForKey:KEY_EAST_ASIAN_FONT] fontValue];
+    self.privateUseAreaFont = [[self stringForKey:KEY_PUA_FONT] fontValue];
     self.nonAsciiFont = [[self stringForKey:KEY_NON_ASCII_FONT] fontValue];
 
     // Update the descriptions.
@@ -190,6 +242,22 @@ static NSInteger kNonAsciiFontButtonTag = 1;
         fontName = @"Unknown Font";
     }
     [_normalFontDescription setStringValue:fontName];
+
+    if (_eastAsianFont != nil) {
+        fontName = [NSString stringWithFormat: @"%gpt %@",
+                    [_eastAsianFont pointSize], [_eastAsianFont displayName]];
+    } else {
+        fontName = @"Unknown Font";
+    }
+    [_eastAsianFontDescription setStringValue:fontName];
+
+    if (_privateUseAreaFont != nil) {
+        fontName = [NSString stringWithFormat: @"%gpt %@",
+                    [_privateUseAreaFont pointSize], [_privateUseAreaFont displayName]];
+    } else {
+        fontName = @"Unknown Font";
+    }
+    [_privateUseAreaFontDescription setStringValue:fontName];
 
     if (_nonAsciiFont != nil) {
         fontName = [NSString stringWithFormat: @"%gpt %@",
@@ -204,6 +272,8 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 
 - (void)updateWarnings {
     [_normalFontWantsAntialiasing setHidden:!self.normalFont.futureShouldAntialias];
+    [_eastAsianFontWantsAntialiasing setHidden:!self.eastAsianFont.futureShouldAntialias];
+    [_privateUseAreaFontWantsAntialiasing setHidden:!self.privateUseAreaFont.futureShouldAntialias];
     [_nonasciiFontWantsAntialiasing setHidden:!self.nonAsciiFont.futureShouldAntialias];
 }
 
@@ -211,7 +281,7 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 #pragma mark - Actions
 
 - (IBAction)openFontPicker:(id)sender {
-    _fontPickerIsForNonAsciiFont = ([sender tag] == kNonAsciiFontButtonTag);
+    _fontPickerTag = [sender tag];
     [self showFontPanel];
 }
 
@@ -223,7 +293,27 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 
     NSFontPanel* aFontPanel = [[NSFontManager sharedFontManager] fontPanel: YES];
     [aFontPanel setAccessoryView:_displayFontAccessoryView];
-    NSFont *theFont = (_fontPickerIsForNonAsciiFont ? _nonAsciiFont : _normalFont);
+    NSFont *theFont;
+
+    switch (_fontPickerTag) {
+        case kGlobalFontButtonTag:
+            theFont = _normalFont;
+            break;
+        case kEastAsianFontButtonTag:
+            theFont = _eastAsianFont;
+            break;
+        case kPrivateUseAreaFontButtonTag:
+            theFont = _privateUseAreaFont;
+            break;
+        case kNonAsciiFontButtonTag:
+            theFont = _nonAsciiFont;
+            break;
+    }
+
+    if (theFont == nil) {
+        theFont = _normalFont;
+    }
+
     [[NSFontManager sharedFontManager] setSelectedFont:theFont isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:self];
 }
@@ -234,13 +324,28 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 
 // sent by NSFontManager up the responder chain
 - (void)changeFont:(id)fontManager {
-    if (_fontPickerIsForNonAsciiFont) {
-        [self setString:[[fontManager convertFont:_nonAsciiFont] stringValue]
-                 forKey:KEY_NON_ASCII_FONT];
-    } else {
-        [self setString:[[fontManager convertFont:_normalFont] stringValue]
-                 forKey:KEY_NORMAL_FONT];
+    NSFont *theFont;
+    NSString *key;
+
+    switch (_fontPickerTag) {
+        case kGlobalFontButtonTag:
+            theFont = _normalFont;
+            key = KEY_NORMAL_FONT;
+            break;
+        case kEastAsianFontButtonTag:
+            theFont = _eastAsianFont;
+            key = KEY_EAST_ASIAN_FONT;
+            break;
+        case kPrivateUseAreaFontButtonTag:
+            theFont = _privateUseAreaFont;
+            key = KEY_PUA_FONT;
+            break;
+        case kNonAsciiFontButtonTag:
+            theFont = _nonAsciiFont;
+            key = KEY_NON_ASCII_FONT;
+            break;
     }
+    [self setString:[[fontManager convertFont:theFont] stringValue] forKey:key];
     [self updateFontsDescriptions];
 }
 

@@ -1053,6 +1053,8 @@ ITERM_WEAKLY_REFERENCEABLE
     [_textview setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
     [_textview setFont:[ITAddressBookMgr fontWithDesc:[_profile objectForKey:KEY_NORMAL_FONT]]
           nonAsciiFont:[ITAddressBookMgr fontWithDesc:[_profile objectForKey:KEY_NON_ASCII_FONT]]
+         eastAsianFont:[ITAddressBookMgr fontWithDesc:[_profile objectForKey:KEY_EAST_ASIAN_FONT]]
+    privateUseAreaFont:[ITAddressBookMgr fontWithDesc:[_profile objectForKey:KEY_PUA_FONT]]
      horizontalSpacing:[[_profile objectForKey:KEY_HORIZONTAL_SPACING] floatValue]
        verticalSpacing:[[_profile objectForKey:KEY_VERTICAL_SPACING] floatValue]];
     [self setTransparency:[[_profile objectForKey:KEY_TRANSPARENCY] floatValue]];
@@ -2774,9 +2776,17 @@ ITERM_WEAKLY_REFERENCEABLE
     [_textview setSemanticHistoryPrefs:aDict[KEY_SEMANTIC_HISTORY]];
     [_textview setUseNonAsciiFont:[iTermProfilePreferences boolForKey:KEY_USE_NONASCII_FONT
                                                             inProfile:aDict]];
+    [_textview setUseEastAsianFont:[iTermProfilePreferences boolForKey:KEY_USE_EAST_ASIAN_FONT
+                                                            inProfile:aDict]];
+    [_textview setUsePrivateUseAreaFont:[iTermProfilePreferences boolForKey:KEY_USE_PUA_FONT
+                                                            inProfile:aDict]];
     [_textview setAntiAlias:[iTermProfilePreferences boolForKey:KEY_ASCII_ANTI_ALIASED
                                                       inProfile:aDict]
                    nonAscii:[iTermProfilePreferences boolForKey:KEY_NONASCII_ANTI_ALIASED
+                                                      inProfile:aDict]
+                  eastAsian:[iTermProfilePreferences boolForKey:KEY_EAST_ASIAN_ALIASED
+                                                      inProfile:aDict]
+             privateUseArea:[iTermProfilePreferences boolForKey:KEY_PUA_ALIASED
                                                       inProfile:aDict]];
     
     [self setEncoding:[iTermProfilePreferences unsignedIntegerForKey:KEY_CHARACTER_ENCODING inProfile:aDict]];
@@ -2809,6 +2819,8 @@ ITERM_WEAKLY_REFERENCEABLE
     _textview.badgeLabel = [self badgeLabel];
     [self setFont:[ITAddressBookMgr fontWithDesc:aDict[KEY_NORMAL_FONT]]
         nonAsciiFont:[ITAddressBookMgr fontWithDesc:aDict[KEY_NON_ASCII_FONT]]
+        eastAsianFont:[ITAddressBookMgr fontWithDesc:aDict[KEY_EAST_ASIAN_FONT]]
+        privateUseAreaFont:[ITAddressBookMgr fontWithDesc:aDict[KEY_PUA_FONT]]
         horizontalSpacing:[iTermProfilePreferences floatForKey:KEY_HORIZONTAL_SPACING inProfile:aDict]
         verticalSpacing:[iTermProfilePreferences floatForKey:KEY_VERTICAL_SPACING inProfile:aDict]];
     [_screen setSaveToScrollbackInAlternateScreen:[iTermProfilePreferences boolForKey:KEY_SCROLLBACK_IN_ALTERNATE_SCREEN
@@ -3611,6 +3623,8 @@ ITERM_WEAKLY_REFERENCEABLE
 
 - (void)setFont:(NSFont*)font
      nonAsciiFont:(NSFont*)nonAsciiFont
+    eastAsianFont:(NSFont*)eastAsianFont
+    privateUseAreaFont:(NSFont*)privateUseAreaFont
     horizontalSpacing:(float)horizontalSpacing
     verticalSpacing:(float)verticalSpacing {
     DLog(@"setFont:%@ nonAsciiFont:%@", font, nonAsciiFont);
@@ -3619,6 +3633,8 @@ ITERM_WEAKLY_REFERENCEABLE
     DLog(@"Window frame: %@", window);
     if ([_textview.font isEqualTo:font] &&
         [_textview.nonAsciiFontEvenIfNotUsed isEqualTo:nonAsciiFont] &&
+        [_textview.eastAsianFontEvenIfNotUsed isEqualTo:eastAsianFont] &&
+        [_textview.privateUseAreaFontEvenIfNotUsed isEqualTo:privateUseAreaFont] &&
         [_textview horizontalSpacing] == horizontalSpacing &&
         [_textview verticalSpacing] == verticalSpacing) {
         // There's an unfortunate problem that this is a band-aid over.
@@ -3632,9 +3648,11 @@ ITERM_WEAKLY_REFERENCEABLE
     }
     DLog(@"Line height was %f", (float)[_textview lineHeight]);
     [_textview setFont:font
-         nonAsciiFont:nonAsciiFont
-        horizontalSpacing:horizontalSpacing
-        verticalSpacing:verticalSpacing];
+          nonAsciiFont:nonAsciiFont
+         eastAsianFont:eastAsianFont
+    privateUseAreaFont:privateUseAreaFont
+     horizontalSpacing:horizontalSpacing
+       verticalSpacing:verticalSpacing];
     DLog(@"Line height is now %f", (float)[_textview lineHeight]);
     [_delegate sessionDidChangeFontSize:self];
     DLog(@"After:\n%@", [window.contentView iterm_recursiveDescription]);
@@ -3674,6 +3692,8 @@ ITERM_WEAKLY_REFERENCEABLE
         NSNumber *vSpacing = [fonts objectAtIndex:3];
         [_textview setFont:font
               nonAsciiFont:nonAsciiFont
+             eastAsianFont:nil
+        privateUseAreaFont:nil
             horizontalSpacing:[hSpacing doubleValue]
             verticalSpacing:[vSpacing doubleValue]];
     }
@@ -3704,12 +3724,16 @@ ITERM_WEAKLY_REFERENCEABLE
     DLog(@"changeFontSizeDirection:%d", dir);
     NSFont* font;
     NSFont* nonAsciiFont;
+    NSFont* eastAsianFont;
+    NSFont* privateUseAreaFont;
     float hs, vs;
     if (dir) {
         // Grow or shrink
         DLog(@"grow/shrink");
         font = [self fontWithRelativeSize:dir from:_textview.font];
         nonAsciiFont = [self fontWithRelativeSize:dir from:_textview.nonAsciiFontEvenIfNotUsed];
+        eastAsianFont = [self fontWithRelativeSize:dir from:_textview.eastAsianFontEvenIfNotUsed];
+        privateUseAreaFont = [self fontWithRelativeSize:dir from:_textview.privateUseAreaFontEvenIfNotUsed];
         hs = [_textview horizontalSpacing];
         vs = [_textview verticalSpacing];
     } else {
@@ -3718,17 +3742,21 @@ ITERM_WEAKLY_REFERENCEABLE
         NSString* fontDesc = [abEntry objectForKey:KEY_NORMAL_FONT];
         font = [ITAddressBookMgr fontWithDesc:fontDesc];
         nonAsciiFont = [ITAddressBookMgr fontWithDesc:[abEntry objectForKey:KEY_NON_ASCII_FONT]];
+        eastAsianFont = [ITAddressBookMgr fontWithDesc:[abEntry objectForKey:KEY_EAST_ASIAN_FONT]];
+        privateUseAreaFont = [ITAddressBookMgr fontWithDesc:[abEntry objectForKey:KEY_PUA_FONT]];
         hs = [[abEntry objectForKey:KEY_HORIZONTAL_SPACING] floatValue];
         vs = [[abEntry objectForKey:KEY_VERTICAL_SPACING] floatValue];
     }
-    [self setFont:font nonAsciiFont:nonAsciiFont horizontalSpacing:hs verticalSpacing:vs];
+    [self setFont:font nonAsciiFont:nonAsciiFont eastAsianFont:eastAsianFont privateUseAreaFont:privateUseAreaFont horizontalSpacing:hs verticalSpacing:vs];
 
     if (dir || _isDivorced) {
         // Move this bookmark into the sessions model.
         NSString* guid = [self divorceAddressBookEntryFromPreferences];
 
         [self setSessionSpecificProfileValues:@{ KEY_NORMAL_FONT: [ITAddressBookMgr descFromFont:font],
-                                                 KEY_NON_ASCII_FONT: [ITAddressBookMgr descFromFont:nonAsciiFont] }];
+                                                 KEY_NON_ASCII_FONT: [ITAddressBookMgr descFromFont:nonAsciiFont],
+                                                 KEY_EAST_ASIAN_FONT: [ITAddressBookMgr descFromFont:eastAsianFont],
+                                                 KEY_PUA_FONT: [ITAddressBookMgr descFromFont:privateUseAreaFont] }];
         // Set the font in the bookmark dictionary
 
         // Update the model's copy of the bookmark.
