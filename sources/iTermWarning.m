@@ -101,12 +101,12 @@ static BOOL gShowingWarning;
 - (iTermWarningSelection)runModal {
     iTermWarningSelection selection = [self runModalImpl];
 
-    if (selection >= 0 && selection < _warningActions.count) {
-        iTermWarningActionBlock block = _warningActions[selection].block;
-        if (block) {
-            block(selection);
-        }
-    }
+    // if (selection >= 0 && selection < _warningActions.count) {
+    //     iTermWarningActionBlock block = _warningActions[selection].block;
+    //     if (block) {
+    //         block(selection);
+    //     }
+    // }
 
     return selection;
 }

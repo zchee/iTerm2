@@ -3103,13 +3103,13 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 - (void)installShellIntegrationWithCommand:(NSString *)theCommand {
     iTermWarning *warning = [[[iTermWarning alloc] init] autorelease];
     warning.title = [NSString stringWithFormat:@"Ok to run this command in the current shell?\n\n%@", theCommand];
-    warning.warningActions =
-    @[
-          [iTermWarningAction warningActionWithLabel:@"OK" block:^(iTermWarningSelection selection) {
-              [_delegate writeTask:theCommand];
-          }],
-          [iTermWarningAction warningActionWithLabel:@"Cancel" block:nil]
-      ];
+    // warning.warningActions =
+    // @[
+    //       [iTermWarningAction warningActionWithLabel:@"OK" block:^(iTermWarningSelection selection) {
+    //           [_delegate writeTask:theCommand];
+    //       }],
+    //       [iTermWarningAction warningActionWithLabel:@"Cancel" block:nil]
+    //   ];
     warning.identifier = @"NoSyncConfirmShellIntegrationCommand";
     warning.warningType = kiTermWarningTypePermanentlySilenceable;
     [warning runModal];
